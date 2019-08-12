@@ -1,6 +1,16 @@
 'use strict';
+/**
+ * identity: Returns a value unchanged.
+ * 
+ * @param {Datatype} value: the value to return.
+ * 
+ * @return {Datatype} the same as inputed value.
+ */
+function identity(value){
+    return value;
+}
 
-
+module.exports.identity = identity;
 /**
  * each: Designed to loop over a collection, Array or Object, and applies the 
  * action Function to each value in the collection.
