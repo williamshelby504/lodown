@@ -9,14 +9,15 @@
  * @param {Function} action: The Function to be applied to each value in the 
  * collection
  */
-function each(collection, action) {
-    if(Array.isArray(collection)) {
-        for(var i = 0; i < collection.length; i++) {
-            action(collection[i], i, collection);
+function each(collection, func){
+    for (let i = 0; i < collection.length; i++){
+        if (typeOf(collection) === 'array'){
+            func(collection[i], i, collection);
         }
-    } else {
-        for (var key in collection) {
-            action(collection[key], key, collection);
+    }
+    for (let key in collection){
+        if (typeOf(collection) === 'object'){
+            func(collection[key], key, collection);
         }
     }
 }
@@ -30,10 +31,14 @@ module.exports.each = each;
  *
  * @return: Returns true if it is an array, otherwise false.
  */
-function typeOf(value) {
-    if(Array.isArray(value)) return "array";
-    if(value === null) return "null";
-    else return typeof value;
+ function typeOf(value){
+    if (value === null){
+        return 'null';
+    } else if (Array.isArray(value)){
+        return 'array';
+    } else {
+        return typeof value;
+    }
 }
 module.exports.typeOf = typeOf;
 
@@ -47,9 +52,22 @@ module.exports.typeOf = typeOf;
  * @return: Returns the first element(s) of an array.
  */
 function first(array, number) {
-    if(!Array.isArray(array) || number < 0) return [];
-    else if(typeof number !== "number" || number === undefined) return array[0];
-    else return array.slice(0, number);
+    let newArr = [];
+    if (typeOf(array) !== 'array') {
+        return newArr;
+    }
+    else if (typeOf(number) !== 'number') {
+        return array[0];
+    }
+    else {
+        if (number > array.length) {
+            number = array.length;
+        }
+        for (var i = 0; i < number; i++) {
+            newArr.push(array[i]);
+        }
+    }
+    return newArr;
 }
 module.exports.first = first;
  
@@ -63,9 +81,24 @@ module.exports.first = first;
 * @return: Returns the last element(s) of an array.
 */
 function last(array, number) {
-    if(!Array.isArray(array) || number < 0) return [];
-    else if(typeof number !== "number" || number === undefined) return array[array.length -1];
-    else return array.slice(-number);
+
+
+    let newArr = [];
+    if (typeOf(array) !== 'array') {
+        return newArr;
+    }
+    else if (typeOf(number) !== 'number' || number === undefined) {
+        return array[array.length - 1];
+    }
+    else {
+        if (number > array.length) {
+            number = array.length;
+        }
+        for (var i = array.length - number; i < array.length; i++) {
+            newArr.push(array[i]);
+        }
+        return newArr;
+    }
 }
 module.exports.last = last;
 
@@ -78,14 +111,13 @@ module.exports.last = last;
  * 
  * @return: Returns index of the matched value, otherwise -1.
  */
-function indexOf(array, number) {
-    var result = -1;
-    each(array, function(item, index) {
-        if (item === number && result === -1) {
-            result = index;
+function indexOf(array, value) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i] === value) {
+            return i;
         }
-    });
-    return result;
+    }
+        return -1;
 }
 module.exports.indexOf = indexOf;
  
@@ -111,14 +143,14 @@ module.exports.contains = contains;
  * 
  * @return: Returns a duplicate free version of the original array.
  */
-function unique(array) {
-    let uniqueArray = [];
-    each(array, function(item) {
-        if(indexOf(uniqueArray, item) === -1) {
-            uniqueArray.push(item);
-        }
-    });
-    return uniqueArray;
+function unique(array){
+    let newArr = [];
+    for (let i = 0; i < array.length; i++){
+    if (newArr.indexOf(array[i]) === -1){
+      newArr.push((array[i]));
+  }
+        
+    }return newArr;
 }
 module.exports.unique = unique;
 
@@ -131,14 +163,19 @@ module.exports.unique = unique;
  * 
  * @return: Returns a new array of items that returned true.
  */
-function filter(array, action) {
-    let filterArray = [];
-    each(array, function(value, index, collection) {
-        if (action(value, index, collection)) {
-            filterArray.push(value);
+function filter(array, func) {
+    let newArr = [];
+    // use each to get all the elements
+    each(array, function(element, i, array){
+        if (func(element, i, array) === true){
+            newArr.push(element);
         }
+        
     });
-    return filterArray;
+    
+    
+    
+    return newArr;
 }
 module.exports.filter = filter;
 
@@ -151,14 +188,20 @@ module.exports.filter = filter;
  * 
  * @return: Returns a new array of items that returned false.
  */
-function reject(array, action) {
-    let filterArray = [];
-    each(array, function(value, index, collection) {
-        if (!action(value, index, collection)) {
-            filterArray.push(value);
+function reject(array, func){
+    let newArr = [];
+    // use each to get all the elements
+    each(array, function(element, i, array){
+        if (func(element, i, array) === false){
+            newArr.push(element);
         }
+        
     });
-    return filterArray;
+    
+    
+    
+    return newArr;
+
 }
 module.exports.reject = reject;
  
@@ -171,14 +214,26 @@ module.exports.reject = reject;
  * 
  * @return: Returns a new array of two sub-arrays. One has items that passed as true while the other has items that passed as false.
  */
-function partition(array, action) {
-    const filterArray = filter(array, function(value, index, collection) {
-        return action(value, index, collection);
+function partition(array, func) {
+    let newArr = [];
+    let arr = [];
+    let arrAll = [];
+    // use each to get all the elements
+    each(array, function(element, i, array) {
+        if (func(element, i, array) === false) {
+            newArr.push(element);
+            return newArr;
+        } 
+        
+            if (func(element, i, array) === true) {
+                arr.push(element);
+                return arr;
+            }
+
     });
-    const rejectArray = reject(array, function(value, index, collection) {
-        return action(value, index, collection);
-    });
-    return [filterArray, rejectArray];
+    arrAll.push(arr, newArr);
+    return arrAll;
+
 }
 module.exports.partition = partition;
  
@@ -191,12 +246,12 @@ module.exports.partition = partition;
  * 
  * @return: Returns a new array of modified items.
  */
-function map(collection, action) {
-    const mapArray = [];
-    each(collection, function(element, index, collection) {
-        mapArray.push(action(element, index, collection));
+function map(collection, func){
+    let newArr = [];
+    each(collection, function(element, i, array) {
+        newArr.push(func(element, i, array));
     });
-    return mapArray;
+    return newArr;
 }
 module.exports.map = map;
  
@@ -209,11 +264,12 @@ module.exports.map = map;
  * 
  * @return: Returns a new array of property values.
  */
-function pluck(array, property) {
-    return map(array, function(property, key, collection){
-        return property.name;
+function pluck(array, property){
+   var result = map(array, function(element, i, array) {
+        return element[property];
     });
-} 
+    return result;
+};
 module.exports.pluck = pluck;
 
 /**
@@ -224,25 +280,22 @@ module.exports.pluck = pluck;
  * 
  * @return: Returns a boolean value.
  */
-function every(collection, action) {
-    const everyArray = [];
-    if (action !== undefined) {
-        each(collection, function(value, index, collection) {
-            let every = action(value, index, collection);
-            everyArray.push(every);
-        });
-        if (everyArray.includes(false)) {
-            return false;
-        }
-        return true;
-    }
-    let container = true;
-    each(collection, function(value, index, collection) {
-        if (!value) {
-            container = false;
-        }
-    });
-    return container;
+function every(collection, action){
+   var bool = true;
+   if(typeof action === 'function'){ 
+       each(collection, function(ele, i, collection){
+           if(!action(ele, i, collection)){ 
+            bool = false;
+           }
+       });
+   } else {
+       each(collection, function(ele){
+         if(!ele) {
+             bool = false;
+         }
+       });
+   }
+   return bool;
 }
 module.exports.every = every;
 
@@ -255,25 +308,23 @@ module.exports.every = every;
  * 
  * @return: Returns a boolean value.
  */
-function some(collection, action) {
-    const someArray = [];
-    if (action !== undefined) {
-        each(collection, function(value, index, collection) {
-            let some = action(value, index, collection);
-            someArray.push(some);
+function some(collection, func) {
+    var bool = false;
+    if (typeof func === 'function') {
+        each(collection, function(ele, i, collection) {
+            if (func(ele, i, collection)) {
+                bool = true ;
+            }
         });
-        if (someArray.includes(true)) {
-            return true;
-        }
-        return false;
     }
-    let container = true;
-    each(collection, function(value, index, collection) {
-        if (!value) {
-            container = false;
-        }
-    });
-    return container;
+    else {
+        each(collection, function(ele) {
+            if (ele) {
+                bool = true;
+            }
+        });
+    }
+    return bool;
 }
 module.exports.some = some;
 
@@ -287,14 +338,22 @@ module.exports.some = some;
  * 
  * @return: Returns the accumulated value at either the accumulator or the initial value in the collection.
  */
-function reduce(collection, action, seed) {
-    for (var i = 0; i < collection.length; i++) {
-        if (seed === undefined) {
-            seed = collection[i];
-        } else {
-            seed = action(seed, collection[i], i, collection);
-        }
-    } return seed;
+function reduce(array, func, seed) {
+    let preResult;
+    if (seed !== undefined) {
+        preResult = seed;
+        each(array, function(element, i, array) {
+            preResult = func(preResult, element, i);
+        });
+    }
+    else if (seed === undefined) {
+preResult = array[0];
+each(array.slice(1), function(element, i, array) {
+    preResult = func(preResult, element, i + 1);
+});
+    }
+    return preResult;
+
 }
 module.exports.reduce = reduce;
  
@@ -306,11 +365,11 @@ module.exports.reduce = reduce;
  * 
  * @return: Returns the object with newly duplicated properties.
  */
-function extend(object1, object2) {
-    for (var i = 1; i < arguments.length; i++)
-        for (var key in arguments[i])
-            if (arguments[i].hasOwnProperty(key))
-                arguments[0][key] = arguments[i][key];
-    return arguments[0];
+function extend(object, ...objectArr){
+    each(objectArr, function(element, i, array) {
+        each(element, function(value, key, obj) {
+            object[key] = value;
+        });
+    });return object;
 }
 module.exports.extend = extend;
