@@ -342,7 +342,7 @@ module.exports.some = some;
 /**
  * reduce: Designed to loop over all elements in a collection, add its value to the previous value, and return a single value.
  * 
- * @param {Array or Object} collection: The collection looped over.
+ * @param {Array or Object} array: The array is looped over.
  * @param {Function} action: The function that runs after the loop.
  * @param {Value} seed: The first value returned from the function.
  * 
@@ -375,8 +375,8 @@ module.exports.reduce = reduce;
  * 
  * @return: Returns the object with newly duplicated properties.
  */
-function extend(object, ...objectArr){
-    each(objectArr, function(element, i, array) {
+function extend(object, ...object2){
+    each(object2, function(element, i, array) {
         each(element, function(value, key, obj) {
             object[key] = value;
         });
